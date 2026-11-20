@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Divija’s Party Night</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0618;--ink:#fff4ff;--mute:#b9a6d9;--panel:#1a0f33;--pink:#ff3d9a;--cyan:#27e6ff;--gold:#ffd24a;--lime:#a6ff4d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0618}}
+:root[data-theme="dark"]{--bg:#0b0618}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Outfit','Helvetica Neue',Arial,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#app{height:100%;display:flex;flex-direction:column;align-items:center;max-width:520px;margin:0 auto}
+#top{display:flex;align-items:center;gap:12px;padding:8px 14px;width:100%}
+#ball{width:54px;height:54px;border-radius:50%;flex:none;background:repeating-conic-gradient(#e9e4f5 0 12deg,#8d82b3 12deg 24deg),#ccc;box-shadow:0 0 22px #fff8,0 0 50px var(--pink);animation:spin 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-family:'Bungee','Impact',sans-serif;font-weight:400;font-size:clamp(1.05rem,4.6vw,1.5rem);margin:0;line-height:1.1;text-shadow:0 0 14px var(--pink)}
+#sc{margin-left:auto;text-align:right;font-weight:600;font-size:1.1rem;color:var(--gold)}
+#wrap{position:relative;flex:1;width:100%;min-height:0}
+canvas{width:100%;height:100%;display:block}
+#fb{position:absolute;left:0;right:0;top:38%;text-align:center;font-family:'Bungee','Impact',sans-serif;font-size:2rem;pointer-events:none;opacity:0;text-shadow:0 0 18px currentColor}
+#pads{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;padding:8px 10px 14px}
+.pad{height:68px;border:0;border-radius:16px;font-family:'Bungee','Impact',sans-serif;font-size:1.4rem;color:#0b0618;cursor:pointer;touch-action:manipulation}
+.pad:active,.pad.on{transform:scale(.94);filter:brightness(1.4)}
+.pad:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.ov{position:fixed;inset:0;display:none;place-items:center;background:rgba(8,3,20,.8);z-index:10;padding:18px}
+.ov.show{display:grid}
+.box{background:var(--panel);border:2px solid var(--pink);box-shadow:0 0 40px #ff3d9a77;border-radius:26px;padding:26px 22px;max-width:400px;width:100%;text-align:center}
+.box h2{font-family:'Bungee','Impact',sans-serif;font-weight:400;margin:0 0 10px;font-size:clamp(1.5rem,7vw,2.1rem);color:var(--gold);text-shadow:0 0 16px var(--gold)}
+.box p{margin:8px 0;line-height:1.5;font-size:1.08rem;color:var(--ink)}
+.big{font-size:3rem;margin:0!important}
+.res{color:var(--cyan)!important;font-weight:600}
+.btn{font-family:'Bungee','Impact',sans-serif;font-size:1.05rem;border:0;border-radius:999px;padding:13px 28px;margin-top:10px;background:linear-gradient(90deg,var(--pink),var(--gold));color:#0b0618;cursor:pointer}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+#app{position:relative;z-index:1}
+.bl{position:absolute;bottom:-90px;width:46px;height:58px;border-radius:50% 50% 48% 48%;opacity:.45;animation:fl linear infinite}
+.bl::after{content:"";position:absolute;left:50%;bottom:-16px;width:2px;height:18px;background:#fff6}
+@keyframes fl{to{transform:translateY(-125vh)}}
+.gift{font-size:5rem;display:inline-block;animation:wob 1.2s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg) scale(1.1)}}
+.cf{position:fixed;top:-20px;width:10px;height:14px;z-index:20;pointer-events:none;animation:cfall linear forwards}
+@keyframes cfall{to{transform:translateY(112vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){#ball,.bl,.gift{animation:none}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="app">
+  <div id="top"><div id="ball"></div><h1>Happy Birthday<br>Divija! 🎉</h1><div id="sc"><div id="score">0</div><div id="combo"></div></div></div>
+  <div id="wrap"><canvas id="cv" aria-label="Rhythm game lanes"></canvas><div id="fb"></div></div>
+  <div id="pads"></div>
+</div>
+<div class="ov show" id="start"><div class="box">
+  <p class="big gift">🎁</p><h2>Surprise, Divija!</h2>
+  <p>Your birthday party starts now. Tap the pads on the beat to unwrap your gift. Sound on! 🔊</p>
+  <button class="btn" id="go">Open your surprise</button></div></div>
+<div class="ov" id="end"><div class="box">
+  <p class="big gift">🎂</p><h2>Happy Birthday, Divija!</h2>
+  <p class="res" id="res"></p>
+  <p>The dance floor is all yours tonight. Wishing you a year full of great music, better company and moments worth celebrating.</p>
+  <p>Let’s party! 🪩💃</p>
+  <button class="btn" id="again">Run it back</button></div></div>
+<script>
+(function(){
+  var COLS=["#ff3d9a","#27e6ff","#ffd24a","#a6ff4d"], KEYS=["d","f","j","k"], LET=["D","I","V","A"];
+  var BPM=118, B=60/BPM, FALL=1.7, N=72, HIT=.2, PERF=.075;
+  var cv=document.getElementById("cv"), ctx=cv.getContext("2d"), fb=document.getElementById("fb");
+  var W,H,dpr,ac,t0,notes,score,combo,best,running,perf,good,miss,nextBeat,timer,flash=0,fbT=0;
+  var pads=document.getElementById("pads");
+  LET.forEach(function(l,i){
+    var b=document.createElement("button"); b.className="pad"; b.textContent=l; b.style.background=COLS[i];
+    b.setAttribute("aria-label","Lane "+(i+1));
+    b.addEventListener("pointerdown",function(e){e.preventDefault();tap(i);}); pads.appendChild(b);
+  });
+  window.addEventListener("keydown",function(e){var i=KEYS.indexOf(e.key.toLowerCase());if(i>-1&&!e.repeat)tap(i);});
+  function size(){dpr=devicePixelRatio||1;var r=cv.getBoundingClientRect();W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+  addEventListener("resize",size);
+  /* audio */
+  function kick(t){var o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.13);
+    g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.22);}
+  function hat(t){var len=ac.sampleRate*.05,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);
+    for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+    var s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=buf;f.type="highpass";f.frequency.value=7000;g.gain.value=.35;
+    s.connect(f).connect(g).connect(ac.destination);s.start(t);}
+  function bass(t,fr){var o=ac.createOscillator(),g=ac.createGain();o.type="sawtooth";o.frequency.value=fr;
+    var f=ac.createBiquadFilter();f.type="lowpass";f.frequency.value=500;
+    g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+B*.45);o.connect(f).connect(g).connect(ac.destination);o.start(t);o.stop(t+B*.5);}
+  var R={C:65.41,F:87.31,G:98}, CH=["C","C","C","C","G","G","C","C","F","F","G","C"];
+  var MN=[[0,.75,261.63],[.75,.25,261.63],[1,1,293.66],[2,1,261.63],[3,1,349.23],[4,2,329.63],[6,.75,261.63],[6.75,.25,261.63],[7,1,293.66],[8,1,261.63],[9,1,392],[10,2,349.23],[12,.75,261.63],[12.75,.25,261.63],[13,1,523.25],[14,1,440],[15,1,349.23],[16,1,329.63],[17,1,293.66],[18,.75,466.16],[18.75,.25,466.16],[19,1,440],[20,1,349.23],[21,1,392],[22,2,349.23]];
+  function lead(t,f,d){var o=ac.createOscillator(),o2=ac.createOscillator(),g=ac.createGain();o.type="square";o2.type="triangle";o.frequency.value=f;o2.frequency.value=f;
+    g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.09,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d*B*.95);
+    o.connect(g);o2.connect(g);g.connect(ac.destination);o.start(t);o2.start(t);o.stop(t+d*B);o2.stop(t+d*B);}
+  function clap(t){var len=ac.sampleRate*.12,buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(var i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);
+    var s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=buf;f.type="bandpass";f.frequency.value=1600;g.gain.value=.6;s.connect(f).connect(g).connect(ac.destination);s.start(t);}
+  function stab(t,r){[1,1.26,1.5].forEach(function(m){var o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();o.type="sawtooth";o.frequency.value=r*4*m;f.type="lowpass";f.frequency.value=1800;
+    g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+B*.3);o.connect(f).connect(g).connect(ac.destination);o.start(t);o.stop(t+B*.35);});}
+  function confetti(n){for(var i=0;i<n;i++){var c=document.createElement("div");c.className="cf";c.style.left=Math.random()*100+"vw";c.style.background=COLS[i%4];c.style.animationDuration=(1.6+Math.random()*1.8)+"s";document.body.appendChild(c);(function(e){setTimeout(function(){e.remove();},3600);})(c);}}
+  function sched(){
+    while(nextBeat<N+4&&t0+nextBeat*B<ac.currentTime+.25){
+      var b=nextBeat,t=t0+b*B,rt=R[CH[Math.floor((b%24)/2)]]; kick(t); if(b%2)clap(t); hat(t+B/2); bass(t+B/2,rt*(b%2?2:1)); stab(t+B/2,rt);
+      MN.forEach(function(m){if(Math.floor(m[0])===b%24){var rep=Math.floor(b/24);lead(t0+(rep*24+m[0])*B,m[2]*(rep===1?2:1),m[1]);}});
+      nextBeat++;
+    }
+  }
+  /* game */
+  function begin(){
+    document.getElementById("start").classList.remove("show");document.getElementById("end").classList.remove("show");
+    size(); ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.resume)ac.resume();
+    t0=ac.currentTime+2.2; nextBeat=0; notes=[]; score=0; combo=0; best=0; perf=0; good=0; miss=0;
+    for(var n=0;n<N;n++){ if(n>3&&n%4===3&&Math.random()<.5)continue; notes.push({t:t0+n*B,l:Math.floor(Math.random()*4),s:0}); }
+    document.getElementById("score").textContent=0; document.getElementById("combo").textContent="";
+    running=true; clearInterval(timer); timer=setInterval(sched,40); requestAnimationFrame(loop);
+  }
+  function say(txt,c){fb.textContent=txt;fb.style.color=c;fb.style.opacity=1;fbT=.5;}
+  function tap(l){
+    if(!running)return; var now=ac.currentTime, bi=null,bd=9;
+    notes.forEach(function(n){if(n.l===l&&!n.s){var d=Math.abs(n.t-now);if(d<bd){bd=d;bi=n;}}});
+    var p=pads.children[l]; p.classList.add("on"); setTimeout(function(){p.classList.remove("on");},90);
+    if(bi&&bd<HIT){
+      if(bd<PERF){bi.s=1;perf++;score+=100;say("PERFECT","#ffd24a");confetti(6);}else{bi.s=2;good++;score+=50;say("GOOD","#27e6ff");}
+      combo++; best=Math.max(best,combo); flash=.25;
+      document.getElementById("score").textContent=score; document.getElementById("combo").textContent=combo>2?combo+"x combo":"";
+    }
+  }
+  function loop(){
+    if(!running)return; var now=ac.currentTime, hy=H-34, lw=W/4, beat=((now-t0)/B), pulse=beat>0?1-(beat%1):0;
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<4;i++){ /* beams */
+      var g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,COLS[i]+"00"); g.addColorStop(1,COLS[i]+(flash>0?"55":"22"));
+      ctx.fillStyle=g; ctx.fillRect(i*lw+4,0,lw-8,H);
+    }
+    ctx.fillStyle="rgba(255,255,255,"+(.5+.4*pulse)+")"; ctx.fillRect(0,hy,W,3);
+    notes.forEach(function(n){
+      if(n.s)return; var y=hy-(n.t-now)/FALL*hy; if(y<-30)return;
+      if(now-n.t>HIT){n.s=3;miss++;combo=0;document.getElementById("combo").textContent="";return;}
+      ctx.shadowColor=COLS[n.l];ctx.shadowBlur=18;ctx.fillStyle=COLS[n.l];
+      ctx.beginPath();ctx.arc(n.l*lw+lw/2,y,Math.min(26,lw*.3),0,7);ctx.fill();ctx.shadowBlur=0;
+    });
+    if(flash>0)flash-=.016; if(fbT>0){fbT-=.016;if(fbT<=0)fb.style.opacity=0;}
+    if(now>t0+N*B+1){return finish();}
+    requestAnimationFrame(loop);
+  }
+  function finish(){
+    running=false; clearInterval(timer);
+    var tot=perf+good+miss, pct=tot?Math.round((perf+good*.5)/tot*100):0;
+    document.getElementById("res").textContent="Score "+score+" · Best combo "+best+" · Rhythm "+pct+"%";
+    confetti(110);document.getElementById("end").classList.add("show");
+  }
+  document.getElementById("go").addEventListener("click",begin);
+  document.getElementById("again").addEventListener("click",begin);
+  (function(){var bg=document.getElementById("bg");for(var i=0;i<9;i++){var b=document.createElement("div");b.className="bl";b.style.left=(i*11+Math.random()*6)+"%";b.style.background=COLS[i%4];b.style.animationDuration=(9+Math.random()*8)+"s";b.style.animationDelay=(-Math.random()*12)+"s";bg.appendChild(b);}})();
+  size();
+})();
+</script>
+</body>
+</html>
